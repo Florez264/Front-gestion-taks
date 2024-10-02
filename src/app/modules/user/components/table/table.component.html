@@ -1,0 +1,317 @@
+<div class="overflow-x-auto p-4 bg-white rounded-lg shadow-lg">
+  <h2 class="text-xl font-semibold mb-4">Lista de Tareas</h2>
+
+  <button
+    (click)="openCreateTaskModal()"
+    class="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+    Crear Tarea
+  </button>
+
+  <table class="min-w-full bg-gray-50 rounded-lg shadow-sm">
+    <thead class="bg-blue-100">
+      <tr>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">ID</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">Nombre</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">Fecha</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">Estado</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">N° Personas</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">Ver</th>
+        <th class="py-3 px-5 text-left text-gray-600 font-medium">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of paginatedData" class="border-b transition hover:bg-green-50">
+        <td class="py-4 px-5 text-gray-800 font-medium">{{ item.userId.toUpperCase() | slice: 0:4 }}</td>
+        <td class="py-4 px-5 text-gray-800 font-medium">{{ item.name }}</td>
+        <td class="py-4 px-5 text-gray-800 font-medium">{{ item.dueDate }}</td>
+        <td class="py-4 px-5">
+          <span
+            class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-white"
+            [ngClass]="item.completed ? 'bg-green-500' : 'bg-red-500'">
+            {{ item.completed ? 'completadas' : 'pendientes' }}
+          </span>
+        </td>
+        <td class="py-4 px-5 text-gray-800 font-medium">{{ item.personCount }}</td>
+
+        <td class="py-4 px-5 text-gray-800 font-medium">
+          <button (click)="viewTaskDetails(item._id)" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+            <fa-icon [icon]="faEye"></fa-icon>
+          </button>
+        </td>
+
+        <td class="py-4 px-5 text-gray-800 font-medium flex space-x-1">
+          <button
+            (click)="openAddPersonModal(item._id)"
+            class="p-2 bg-green-500 text-white rounded hover:bg-green-700">
+            <fa-icon [icon]="faPlus"></fa-icon>
+          </button>
+          <button
+            (click)="openEditTaskModal(item)"
+            class="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-700">
+            <fa-icon [icon]="faEdit"></fa-icon>
+          </button>
+          <button
+          (click)="confirmDeleteTask(item._id)"
+          class="p-2 bg-red-500 text-white rounded hover:bg-red-700">
+          <fa-icon [icon]="faTrash"></fa-icon>
+        </button>
+        </td>
+      </tr>
+      <tr *ngIf="paginatedData.length === 0">
+        <td colspan="6" class="text-center py-4">No se encontraron tareas</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-6 flex justify-center space-x-2 flex-wrap">
+  <button
+    *ngFor="let page of pages"
+    (click)="goToPage(page)"
+    [class.bg-blue-500]="currentPage === page"
+    [class.text-white]="currentPage === page"
+    class="px-4 py-2 border rounded-full transition transform hover:scale-105 hover:bg-blue-300 shadow-md flex-shrink-0 focus:outline-none focus:ring focus:ring-blue-300 z-100">
+    {{ page }}
+  </button>
+</div>
+
+
+
+
+<div *ngIf="showCreateTaskModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <h3 class="text-lg font-semibold mb-6 text-center text-blue-600">Crear Tarea</h3>
+    <form (ngSubmit)="submitTask()" #taskForm="ngForm">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700">Nombre de la Tarea</label>
+        <input
+          id="name"
+          name="name"
+          [(ngModel)]="newTask.name"
+          required
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2 transition duration-200 ease-in-out"
+          placeholder="Ej. Crear Front-end"
+        />
+      </div>
+      <div class="mb-6">
+        <label for="dueDate" class="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
+        <input
+          id="dueDate"
+          name="dueDate"
+          type="date"
+          [(ngModel)]="newTask.dueDate"
+          required
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2 transition duration-200 ease-in-out"
+        />
+      </div>
+      <div class="flex justify-between">
+        <button
+          type="button"
+          (click)="closeCreateTaskModal()"
+          class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition duration-150 ease-in-out"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-150 ease-in-out"
+        >
+          Crear
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div *ngIf="showAddPersonModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-60">
+  <div class="bg-white rounded-lg p-8 w-full max-w-md shadow-2xl relative">
+    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 p-4 rounded-full shadow-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 00-12.32 0L12 14z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7m-6 0h12" />
+      </svg>
+    </div>
+
+    <h3 class="text-xl font-bold text-center text-gray-700 mb-6 mt-8">Añadir Persona a la Tarea</h3>
+
+    <form (ngSubmit)="submitAddPerson()" #addPersonForm="ngForm">
+      <div class="mb-4">
+        <label for="fullName" class="block text-sm font-semibold text-gray-600">Nombre Completo</label>
+        <input
+          id="fullName"
+          name="fullName"
+          [(ngModel)]="newPerson.fullName"
+          required
+          class="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="age" class="block text-sm font-semibold text-gray-600">Edad</label>
+        <input
+          id="age"
+          name="age"
+          type="number"
+          [(ngModel)]="newPerson.age"
+          required
+          class="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="skills" class="block text-sm font-semibold text-gray-600">Habilidades</label>
+        <input
+          id="skills"
+          name="skills"
+          [(ngModel)]="newPerson.skills"
+          placeholder="Separar por comas (Ej: JavaScript, Node.js)"
+          required
+          class="mt-2 block w-full border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+        />
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <button type="button" (click)="closeAddPersonModal()" class="mr-3 px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition duration-300">
+          Cancelar
+        </button>
+        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition duration-300">
+          Añadir Persona
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+<div *ngIf="showTaskDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles de la Tarea</h3>
+
+    <div class="mb-4">
+      <h4 class="text-lg font-semibold text-gray-700">Nombre de la Tarea:</h4>
+      <p class="text-gray-600">{{ selectedTask?.name }}</p>
+    </div>
+
+    <div class="mb-4">
+      <h4 class="text-lg font-semibold text-gray-700">Fecha de Vencimiento:</h4>
+      <p class="text-gray-600">{{ selectedTask?.dueDate }}</p>
+    </div>
+
+    <div class="mb-4">
+      <h4 class="text-lg font-semibold text-gray-700">Estado:</h4>
+      <span
+        class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-white"
+        [ngClass]="selectedTask?.completed ? 'bg-green-500' : 'bg-red-500'">
+        {{ selectedTask?.completed ? 'Completada' : 'Pendiente' }}
+      </span>
+    </div>
+
+    <div>
+      <h4 class="text-lg font-semibold text-gray-700 mb-2">Personas Asignadas:</h4>
+      <ul class="space-y-2 max-h-48 overflow-y-auto">
+        <li *ngFor="let person of selectedTask?.persons" class="border p-4 rounded-md shadow-sm bg-gray-50">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold">{{ person.fullName }}</span>
+            <div class="space-x-2">
+              <button
+                (click)="togglePersonDetails(person)"
+                class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                {{ person.showDetails ? 'Ocultar' : 'Ver' }} Detalles
+              </button>
+              <button
+                (click)="confirmRemovePerson(selectedTask?._id, person.personId)"
+                class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition">
+                Eliminar
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="person.showDetails" class="mt-2 space-y-2">
+            <p><strong>Edad:</strong> {{ person.age }}</p>
+            <div>
+              <strong>Habilidades:</strong>
+              <ul class="list-disc pl-5">
+                <li *ngFor="let skill of person.skills">{{ skill.name }}</li>
+              </ul>
+            </div>
+            <p><strong>Estado:</strong>
+              <span
+                class="inline-block px-2 py-1 rounded-full text-sm font-semibold text-white"
+                [ngClass]="person.completed ? 'bg-green-500' : 'bg-red-500'">
+                {{ person.completed ? 'Completada' : 'Pendiente' }}
+              </span>
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button (click)="closeTaskDetailsModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="showEditTaskModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+  <div class="bg-white rounded-lg p-6 w-full max-w-3xl overflow-y-auto">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Editar Tarea</h3>
+
+    <form [formGroup]="editTaskForm" (ngSubmit)="onSubmitEditTask()">
+      <div class="mb-4">
+        <label for="taskName" class="block text-gray-700 font-semibold">Nombre de la Tarea</label>
+        <input
+          id="taskName"
+          formControlName="name"
+          type="text"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          [ngClass]="{'border-red-500': editTaskForm.get('name')?.invalid && editTaskForm.get('name')?.touched}">
+      </div>
+
+      <div class="mb-4">
+        <label for="dueDate" class="block text-gray-700 font-semibold">Fecha de Vencimiento</label>
+        <input
+          id="dueDate"
+          formControlName="dueDate"
+          type="date"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          [ngClass]="{'border-red-500': editTaskForm.get('dueDate')?.invalid && editTaskForm.get('dueDate')?.touched}">
+      </div>
+
+      <div class="mb-4">
+        <label for="completed" class="block text-gray-700 font-semibold">Estado</label>
+        <select
+          id="completed"
+          formControlName="completed"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none">
+          <option [ngValue]="false">Pendiente</option>
+          <option [ngValue]="true">Completada</option>
+        </select>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-2">
+        <button
+          type="button"
+          (click)="closeEditTaskModal()"
+          class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          [disabled]="editTaskForm.invalid">
+          Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+

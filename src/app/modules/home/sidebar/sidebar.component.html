@@ -1,0 +1,39 @@
+<aside [ngClass]="{ 'w-64': isSidebarOpen, 'w-20': !isSidebarOpen, 'hidden': !isSidebarOpen && isMobileView }" class="h-full bg-white p-6 shadow-lg rounded-tr-lg rounded-br-lg transition-width duration-300 md:block">
+  <button (click)="toggleSidebar()" class="p-2 focus:outline-none text-gray-600 hover:text-gray-800 transition duration-300">
+      <fa-icon [icon]="isSidebarOpen ? faChevronLeft : faChevronRight"></fa-icon>
+  </button>
+
+  <div class="flex items-center mb-4" >
+      <img src="https://cdn-icons-png.flaticon.com/512/1582/1582819.png" class="w-10 h-10 mr-4">
+      <h2 class="text-xl font-bold text-gray-800" *ngIf="isSidebarOpen">
+          Panel Admin
+      </h2>
+  </div>
+
+  <nav>
+      <ul>
+          <li class="mb-2">
+              <a  [routerLink]="['/home']" routerLinkActive="active" class="block py-2 px-4 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-800 transition duration-300">
+                  <fa-icon [icon]="faTachometerAlt"></fa-icon>
+                  <span *ngIf="isSidebarOpen"> Dashboard</span>
+              </a>
+          </li>
+
+          <li class="mb-2" >
+              <a [routerLink]="['/home/advisors']" routerLinkActive="active" class="block py-2 px-4 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-800 transition duration-300">
+                  <fa-icon [icon]="faUserShield"></fa-icon>
+                  <span *ngIf="isSidebarOpen"> Tareas</span>
+              </a>
+          </li>
+
+
+
+          <li class="mb-2">
+              <button (click)="logout()" class="block w-full text-left py-2 px-4 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-800 transition duration-300">
+                  <fa-icon [icon]="faSignOutAlt"></fa-icon>
+                  <span *ngIf="isSidebarOpen"> Salir</span>
+              </button>
+          </li>
+      </ul>
+  </nav>
+</aside>
