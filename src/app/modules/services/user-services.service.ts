@@ -21,6 +21,15 @@ export class UserServicesService {
     );
   }
 
+  registerUser(username: string, email: string, password: string): Observable<{ message: string; userId: string }> {
+    const url = `${environment.authApi}/register`;  
+    const body = { username, email, password };
+
+    return this.http.post<{ message: string; userId: string }>(url, body).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getTasks(): Observable<ITask[]> {
     const url = `${environment.tasksApi}/list`;
     return this.http.get<ITask[]>(url, { headers: this.getHeaders() }).pipe(
